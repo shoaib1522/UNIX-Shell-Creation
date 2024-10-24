@@ -67,8 +67,6 @@ int main() {
             break;
         }
         
-        // Here we're directly passing the input to execute without parsing
-        // This means the shell cannot handle commands with arguments properly yet
         execute_command(input);
 
         free(input);  // Free the buffer after each command
