@@ -3,74 +3,139 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <fcntl.h>
 #include <limits.h>
 
 #define BUFFER_SIZE 1024  // Buffer size for input
 
 // Function to display the shell prompt with the current working directory
 void display_prompt() {
-    char cwd[PATH_MAX];  // Buffer to hold the current working directory
+    char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("PUCITshell@%s:- ", cwd);  // Display the shell prompt with directory
+        printf("PUCITshell@%s:- ", cwd);
     } else {
         perror("getcwd() error");
     }
 }
 
-// Function to read the user input
+// Function to read the user input from the shell prompt
 char* read_input() {
-    char *buffer = malloc(BUFFER_SIZE * sizeof(char));  // Simple fixed buffer allocation
-    if (!buffer) {
-        fprintf(stderr, "Allocation error\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    // For now, let's assume we only handle commands that are a single line long
-    fgets(buffer, BUFFER_SIZE, stdin);  // Simple input reading (does not handle errors)
+    char *buffer = NULL;
+    size_t bufsize = 0;
+    getline(&buffer, &bufsize, stdin);
     return buffer;
 }
 
-// Very simple function to execute commands, without parsing multiple arguments
-int execute_command(char* command) {
-    pid_t pid;
-    int status;
-    
-    pid = fork();  // Create a child process
+// Function to parse input and split by spaces
+char** parse_input(char* input) {
+    int bufsize = BUFFER_SIZE, position = 0;
+    char** tokens = malloc(bufsize * sizeof(char*));
+    char* token;
+
+    if (!tokens) {
+        fprintf(stderr, "Allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok(input, " \t\r\n\a");
+    while (token != NULL) {
+        tokens[position] = token;
+        position++;
+
+        if (position >= bufsize) {
+            bufsize += BUFFER_SIZE;
+            tokens = realloc(tokens, bufsize * sizeof(char*));
+            if (!tokens) {
+                fprintf(stderr, "Reallocation error\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        token = strtok(NULL, " \t\r\n\a");
+    }
+    tokens[position] = NULL;
+    return tokens;
+}
+
+// Function to execute commands with optional I/O redirection and pipes
+int execute_command(char** args) {
+    int in_redirect = -1, out_redirect = -1;
+    int i = 0;
+
+    // Identify any redirection operators and open the files
+    while (args[i] != NULL) {
+        if (strcmp(args[i], "<") == 0) {
+            in_redirect = open(args[i + 1], O_RDONLY);
+            if (in_redirect < 0) {
+                perror("Error opening input file");
+                return 1;
+            }
+            args[i] = NULL;  // Remove redirection from args
+        } else if (strcmp(args[i], ">") == 0) {
+            out_redirect = open(args[i + 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (out_redirect < 0) {
+                perror("Error opening output file");
+                return 1;
+            }
+            args[i] = NULL;  // Remove redirection from args
+        }
+        i++;
+    }
+
+    pid_t pid = fork();
     if (pid == 0) {  // Child process
-        // Here we're only executing the command without arguments for now
-        if (execlp(command, command, NULL) == -1) {  // Simpler version of exec with no args
+        // Handle input redirection
+        if (in_redirect != -1) {
+            dup2(in_redirect, STDIN_FILENO);
+            close(in_redirect);
+        }
+        // Handle output redirection
+        if (out_redirect != -1) {
+            dup2(out_redirect, STDOUT_FILENO);
+            close(out_redirect);
+        }
+
+        // Execute the command
+        if (execvp(args[0], args) == -1) {
             perror("Error executing command");
         }
         exit(EXIT_FAILURE);
+
     } else if (pid < 0) {  // Fork error
         perror("Error forking");
-    } else {
-        // Parent process waits for the child process to finish
-        waitpid(pid, &status, WUNTRACED);
+
+    } else {  // Parent process
+        waitpid(pid, NULL, 0);
     }
 
-    return 1;  // Keep the shell running
+    return 1;  // Keep shell running
 }
 
+// Main shell loop
 int main() {
-    char* input;  // For holding user input
-    int status = 1;  // Status to control the loop (1 means keep running)
+    char* input;
+    char** args;
+    int status;
 
     do {
-        display_prompt();  // Display the prompt
-        input = read_input();  // Read input from the user
-        
-        // Just a simple check to see if the user typed 'exit'
-        if (strncmp(input, "exit", 4) == 0) {
-            printf("Exiting shell...\n");
-            free(input);  // Free the input buffer before exiting
+        display_prompt();
+        input = read_input();
+
+        // Exit on Ctrl+D (EOF)
+        if (feof(stdin)) {
+            printf("\n");
             break;
         }
-        
-        execute_command(input);
 
-        free(input);  // Free the buffer after each command
-    } while (status);  // Keep the shell running
+        args = parse_input(input);
+        if (args[0] != NULL) {
+            status = execute_command(args);
+        }
+
+        free(input);
+        free(args);
+    } while (status);
 
     return 0;
 }
