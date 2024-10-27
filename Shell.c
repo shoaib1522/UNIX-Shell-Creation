@@ -9,7 +9,6 @@
 
 #define BUFFER_SIZE 1024  // Buffer size for input
 
-// Function to display the shell prompt with the current working directory
 void display_prompt() {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -19,7 +18,6 @@ void display_prompt() {
     }
 }
 
-// Function to read the user input from the shell prompt
 char* read_input() {
     char *buffer = NULL;
     size_t bufsize = 0;
@@ -58,7 +56,6 @@ char** parse_input(char* input) {
     return tokens;
 }
 
-// Function to execute commands with optional I/O redirection and pipes
 int execute_command(char** args) {
     int in_redirect = -1, out_redirect = -1;
     int i = 0;
