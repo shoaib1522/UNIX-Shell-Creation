@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#define BUFFER_SIZE 1024  // Buffer size for input
+#define BUFFER_SIZE 1024 
 
 void display_prompt() {
     char cwd[PATH_MAX];
