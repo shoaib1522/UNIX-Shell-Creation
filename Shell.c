@@ -7,8 +7,9 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#define BUFFER_SIZE 1024 
+#define BUFFER_SIZE 1024  // Buffer size for input
 
+// Function to display the shell prompt with the current working directory
 void display_prompt() {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -18,6 +19,7 @@ void display_prompt() {
     }
 }
 
+// Function to read the user input from the shell prompt
 char* read_input() {
     char *buffer = NULL;
     size_t bufsize = 0;
@@ -56,10 +58,23 @@ char** parse_input(char* input) {
     return tokens;
 }
 
+// Function to execute commands with optional I/O redirection and background process handling
 int execute_command(char** args) {
     int in_redirect = -1, out_redirect = -1;
+    int background = 0;
     int i = 0;
 
+    // Check for background process symbol '&' at the end
+    while (args[i] != NULL) {
+        if (strcmp(args[i], "&") == 0) {
+            background = 1;
+            args[i] = NULL;  // Remove '&' from the arguments list
+            break;
+        }
+        i++;
+    }
+
+    i = 0;
     // Identify any redirection operators and open the files
     while (args[i] != NULL) {
         if (strcmp(args[i], "<") == 0) {
@@ -103,7 +118,13 @@ int execute_command(char** args) {
         perror("Error forking");
 
     } else {  // Parent process
-        waitpid(pid, NULL, 0);
+        if (background) {
+            // Background process: don't wait, print process ID
+            printf("[Background] Started process with PID %d\n", pid);
+        } else {
+            // Foreground process: wait for child to finish
+            waitpid(pid, NULL, 0);
+        }
     }
 
     return 1;  // Keep shell running
