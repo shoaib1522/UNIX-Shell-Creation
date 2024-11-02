@@ -7,7 +7,11 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#define BUFFER_SIZE 1024  // Buffer size for input
+#define BUFFER_SIZE 1024
+#define HISTORY_SIZE 10  // Maximum number of commands in history
+
+char* history[HISTORY_SIZE];  // Array to store command history
+int history_count = 0;  // Current count of commands in history
 
 // Function to display the shell prompt with the current working directory
 void display_prompt() {
@@ -17,6 +21,35 @@ void display_prompt() {
     } else {
         perror("getcwd() error");
     }
+}
+
+// Function to add a command to history
+void add_to_history(char* input) {
+    if (history_count < HISTORY_SIZE) {
+        history[history_count++] = strdup(input);
+    } else {
+        free(history[0]);  // Free oldest command
+        for (int i = 1; i < HISTORY_SIZE; i++) {
+            history[i - 1] = history[i];
+        }
+        history[HISTORY_SIZE - 1] = strdup(input);
+    }
+}
+
+// Function to display command history
+void display_history() {
+    for (int i = 0; i < history_count; i++) {
+        printf("%d: %s", i + 1, history[i]);
+    }
+}
+
+// Function to handle !number commands
+char* get_command_from_history(int index) {
+    if (index < 1 || index > history_count) {
+        printf("No such command in history.\n");
+        return NULL;
+    }
+    return strdup(history[index - 1]);
 }
 
 // Function to read the user input from the shell prompt
@@ -146,9 +179,27 @@ int main() {
             break;
         }
 
+        // Handle !number for history
+        if (input[0] == '!') {
+            int index = atoi(input + 1);
+            free(input);
+            input = get_command_from_history(index);
+            if (input == NULL) {
+                continue;
+            }
+            printf("%s", input);  // Print the command being executed
+        } else {
+            add_to_history(input);  // Add command to history if not a history command
+        }
+
         args = parse_input(input);
         if (args[0] != NULL) {
-            status = execute_command(args);
+            // Check if the command is 'history'
+            if (strcmp(args[0], "history") == 0) {
+                display_history();
+            } else {
+                status = execute_command(args);
+            }
         }
 
         free(input);
