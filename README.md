@@ -74,14 +74,14 @@ This project is licensed under the MIT License.
 
 ---
 
-### Total Versions for the Assignment
+### Total Versions for the Assignment:
 
 As per the assignment document, there are **six versions** in total:
 
 1. **Version 01**: Basic Shell with command parsing and execution.
 2. **Version 02**: I/O Redirection (input and output redirection, upcoming pipes).
-3. **Version 03**: Background processes handling with `&`.
+3. **Version 03**: Background processes handling with  `&`.
 4. **Version 04**: Command history with `history` display and `!number` execution.
-5. **Version 05**: Built-in commands (like `cd`, `exit`, `jobs`, `kill`, and `help`).
+5. **Version 05**: Built-in commands (  like `cd`, `exit`, `jobs`, `kill`, and `help`).
 6. **Version 06 (Bonus)**: Variable handling for user-defined and environment variables.
 
