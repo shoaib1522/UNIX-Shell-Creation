@@ -1,213 +1,196 @@
 
-# UNIX-Shell-Creation
+
+# UNIX Shell Project
 
 ## Overview
-This project involves creating a custom UNIX shell as part of the Operating Systems Lab. The shell will gradually be developed through various versions, adding features like command parsing, I/O redirection, background process handling, command history, and built-in commands. This shell provides an interactive way for users to execute commands within a UNIX environment, offering both basic and advanced functionalities.
+This project involves creating a custom UNIX shell for an Operating Systems lab assignment. The shell simulates essential shell features, allowing users to execute commands, manage background processes, use input/output redirection, manage command history, and handle shell variables. Each version of the shell builds upon the previous, gradually adding more functionality until a fully functional shell environment is achieved.
 
-## Versions & Features
-
-### Version 01 (Basic Shell)
-- Displays a prompt: `PUCITshell:-`.
-- Allows the user to input commands with arguments.
-- Uses `fork()` to create a new process and `execvp()` to execute commands.
-- The parent process waits for the child process to complete.
-- Allows exiting the shell with `<CTRL+D>`.
-
-### Version 02 (I/O Redirection)
-- Supports input (`<`) and output (`>`) redirection.
-- Example usage:
-  - `mycmd < infile > outfile` runs `mycmd` with input from `infile` and directs output to `outfile`.
-  - Uses `open()` and `dup2()` to handle redirection.
-- Basic error handling for file operations.
-- (Upcoming) Pipes support for passing the output of one command as input to another, e.g., `cat file.txt | wc`.
-
-### Version 03 (Background Processes)
-- Supports running processes in the background using `&` at the end of the command.
-  - Example: `find / -name file.txt &` runs the `find` command in the background, returning control to the shell immediately.
-- Handles basic signal processing to prevent zombie processes using `waitpid()` with `WNOHANG`.
-
-### Version 04 (Command History)
-- Maintains a history of the last 10 commands entered.
-- Typing `history` displays the list of recent commands.
-- Allows executing a previous command by typing `!number`, where `number` is the history command index.
-  - Example: `!2` executes the second command in history.
-
-### Version 05 (Built-In Commands)
-- Implements several built-in commands that the shell handles internally:
-  - **`cd <directory>`**: Changes the current working directory.
-  - **`exit`**: Exits the shell.
-  - **`jobs`**: Lists currently running background processes.
-  - **`kill <pid>`**: Terminates a background process by its process ID.
-  - **`help`**: Lists all available built-in commands and their syntax.
-- These commands do not use `fork()` or `execvp()` since they are handled directly by the shell.
-
-## How to Run
-1. Clone the repository.
-2. Compile the source code using:
-   ```bash
-   gcc -o myshell myshell.c
-   ```
-3. Run the shell:
-   ```bash
-   ./myshell
-   ```
-
-## Usage
-- **Basic commands**: Type any UNIX command (e.g., `ls`, `pwd`, `cat`) and press Enter.
-- **I/O Redirection**:
-  - For input redirection, use `<` followed by the filename (e.g., `sort < data.txt`).
-  - For output redirection, use `>` followed by the filename (e.g., `ls > output.txt`).
-- **Background processes**: To run a command in the background, add `&` at the end (e.g., `sleep 10 &`).
-- **Command History**:
-  - Type `history` to see a list of recent commands.
-  - Type `!number` to execute a specific command from the history, where `number` is the command index.
-- **Built-In Commands**:
-  - `cd <directory>`: Change the current directory.
-  - `exit`: Exit the shell.
-  - `jobs`: Display a list of active background processes.
-  - `kill <pid>`: Terminate a background process by its PID.
-  - `help`: Display a list of available built-in commands.
-- **Exit the Shell**: Type `exit` or press `<CTRL+D>` to exit.
-
-## Current Status
-- **Version 01** is implemented with command parsing and basic execution.
-- **Version 02** partially implemented with I/O redirection; pipes are planned.
-- **Version 03** is partially implemented with background processes; further enhancements planned for handling background jobs.
-- **Version 04** is implemented with basic command history and execution of past commands.
-- **Version 05** is implemented with built-in commands for `cd`, `exit`, `jobs`, `kill`, and `help`.
-
-
-### Total Versions for the Assignment:
-
-As per the assignment document, there are **six versions** in total:
-
-1. **Version 01**: Basic Shell with command parsing and execution.
-2. **Version 02**: I/O Redirection (input and output redirection, upcoming pipes).
-3. **Version 03**: Background processes handling with  `&`.
-4. **Version 04**: Command history with `history` display and `!number` execution.
-5. **Version 05**: Built-in commands (  like `cd`, `exit`, `jobs`, `kill`, and `help`).
-6. **Version 06 (Bonus)**: Variable handling for user-defined and environment variables.
-
-Here's a step-by-step guide to test each version of your UNIX shell implementation, with specific commands for each version.
-
----
+## Features by Version
 
 ### Version 01: Basic Shell
-
-1. **Run Basic Commands**:
-   - `ls` – Lists files and directories in the current directory.
-   - `pwd` – Prints the current working directory.
-   - `whoami` – Displays the current user.
-
-2. **Exit the Shell**:
-   - Type `exit` to exit the shell.
-   - Alternatively, press `<CTRL+D>`.
-
-**Expected Outcome**: The shell executes each command, displays output, and exits when `exit` or `<CTRL+D>` is used.
-
----
+- **Objective**: Implement the foundational shell capabilities.
+- **Features**:
+  - Displays a custom prompt.
+  - Parses user input to execute basic commands.
+  - Uses `fork()` and `exec()` to execute commands in a child process.
+  - Allows the shell to exit using the `exit` command or `<CTRL+D>`.
+  
+- **Usage**:
+  - Run simple commands such as `ls`, `pwd`, `whoami`.
+  - Exit by typing `exit` or pressing `<CTRL+D>`.
 
 ### Version 02: I/O Redirection
-
-1. **Output Redirection (`>`)**:
-   - Command: `ls > output.txt`
-   - Check: Open `output.txt` to see the `ls` output.
-
-2. **Input Redirection (`<`)**:
-   - Create a file `unsorted.txt` with unsorted text.
-   - Command: `sort < unsorted.txt`
-   - Expected Outcome: Displays sorted text in the shell.
-
-3. **Combined Input and Output Redirection**:
-   - Command: `sort < unsorted.txt > sorted.txt`
-   - Check: Open `sorted.txt` to see the sorted output.
-
-**Expected Outcome**: Commands should correctly use the specified input and output files.
-
----
+- **Objective**: Add input and output redirection.
+- **Features**:
+  - Supports output redirection using `>`.
+  - Supports input redirection using `<`.
+  - Allows combined input and output redirection, e.g., `command < input.txt > output.txt`.
+  
+- **Usage**:
+  - Redirect output: `ls > output.txt` (writes the output of `ls` to `output.txt`).
+  - Redirect input: `sort < unsorted.txt` (reads from `unsorted.txt`).
+  - Combined redirection: `sort < unsorted.txt > sorted.txt` (sorts contents of `unsorted.txt` and writes to `sorted.txt`).
 
 ### Version 03: Background Processes
-
-1. **Run a Background Process**:
-   - Command: `sleep 30 &`
-   - Expected Outcome: The shell returns immediately with a message indicating the background process ID.
-
-2. **Check Background Jobs**:
-   - Command: `jobs`
-   - Expected Outcome: Displays the background process (e.g., `sleep 30`).
-
-3. **Kill a Background Process**:
-   - Command: `kill <pid>` (replace `<pid>` with the actual process ID from `jobs`).
-   - Verify with `jobs` that the process is terminated.
-
-**Expected Outcome**: Background jobs are listed with `jobs`, and processes can be terminated with `kill`.
-
----
+- **Objective**: Implement background processing.
+- **Features**:
+  - Enables background process execution by appending `&` to commands.
+  - Displays background job details (PID and job ID) when a job is started.
+  - Prevents "zombie" processes by handling background processes in a non-blocking way using `waitpid()` with `WNOHANG`.
+  
+- **Usage**:
+  - Start a background job: `sleep 30 &` (runs `sleep` in the background).
+  - List background jobs: `jobs`.
+  - Kill a background job: `kill <pid>` (replace `<pid>` with the process ID).
 
 ### Version 04: Command History
-
-1. **Run Multiple Commands**:
-   - Examples: `ls`, `pwd`, `whoami`.
-
-2. **View Command History**:
-   - Command: `history`
-   - Expected Outcome: Lists the last 10 commands with numbers.
-
-3. **Execute Command from History**:
-   - Command: `!1` (replace `1` with the number of any command from `history`).
-   - Expected Outcome: Repeats the selected command from history.
-
-**Expected Outcome**: The `history` command shows recent commands, and `!number` repeats a specific command.
-
----
+- **Objective**: Provide a command history feature.
+- **Features**:
+  - Tracks up to the last 10 commands.
+  - Displays command history using `history`.
+  - Supports re-execution of a specific command from history by typing `!number`, where `number` is the command’s position in the history list.
+  
+- **Usage**:
+  - View history: `history` (lists the last 10 commands).
+  - Execute a previous command: `!1` (executes the first command from history).
 
 ### Version 05: Built-In Commands
-
-1. **Change Directory**:
-   - Command: `cd /tmp`
-   - Verify with `pwd` that the directory is now `/tmp`.
-
-2. **View Background Jobs**:
-   - Start a background job: `sleep 30 &`
-   - Command: `jobs`
-   - Expected Outcome: Lists the background job.
-
-3. **Kill a Background Job**:
-   - Command: `kill <pid>` (use the PID from `jobs`).
-
-4. **Help**:
-   - Command: `help`
-   - Expected Outcome: Lists all built-in commands and descriptions.
-
-**Expected Outcome**: Built-in commands (`cd`, `jobs`, `kill`, `help`) work as specified.
-
----
+- **Objective**: Implement core built-in commands without forking.
+- **Features**:
+  - Implements essential built-in commands: `cd`, `jobs`, `kill`, and `help`.
+    - `cd <directory>`: Changes the current directory.
+    - `jobs`: Lists all active background jobs.
+    - `kill <pid>`: Terminates a background process by its PID.
+    - `help`: Displays available built-in commands and their usage.
+  
+- **Usage**:
+  - Change directory: `cd /tmp` (moves to `/tmp` directory).
+  - View background jobs: `jobs`.
+  - Terminate a process: `kill <pid>`.
+  - Get help: `help`.
 
 ### Version 06: Shell Variables
+- **Objective**: Add shell variable support for setting, retrieving, and unsetting variables.
+- **Features**:
+  - Enables users to define variables with `set <name>=<value>`.
+  - Retrieves variable values by typing the variable name directly.
+  - Lists all defined shell variables using `printenv`.
+  - Unsets (removes) a variable with `unset <name>`.
+  
+- **Usage**:
+  - Set a variable: `set myvar=hello` (creates a variable `myvar` with the value `hello`).
+  - Access a variable: `myvar` (prints `hello`).
+  - List all variables: `printenv`.
+  - Unset a variable: `unset myvar` (removes `myvar`).
 
-1. **Set a Variable**:
-   - Command: `set myvar=hello`
-   - Expected Outcome: The variable `myvar` is set with the value `hello`.
+## How to Run the Project
+1. **Compile the Code**:
+   - Open a terminal in the directory containing your code file (e.g., `shell.c`).
+   - Compile the shell with:
+     ```bash
+     gcc -o myshell shell.c
+     ```
 
-2. **Display Variable**:
-   - Command: `myvar`
-   - Expected Outcome: Prints `hello`.
+2. **Run the Shell**:
+   - Start the shell by running:
+     ```bash
+     ./myshell
+     ```
 
-3. **Unset Variable**:
-   - Command: `unset myvar`
-   - Verify by typing `myvar` again; it should give an error or not display anything.
+## Testing Each Version
 
-4. **List All Variables**:
-   - Command: `printenv`
-   - Expected Outcome: Lists all set shell variables.
+### Version 01: Basic Shell
+1. Run commands such as `ls`, `pwd`, and `whoami` to confirm basic execution.
+2. Type `exit` or press `<CTRL+D>` to exit the shell.
 
-**Expected Outcome**: Variables can be set, displayed, unset, and listed with `printenv`.
+### Version 02: I/O Redirection
+1. Output redirection: `ls > output.txt`. Check `output.txt` for output.
+2. Input redirection: Create `unsorted.txt`, then run `sort < unsorted.txt`.
+3. Combined redirection: `sort < unsorted.txt > sorted.txt`. Check `sorted.txt`.
+
+### Version 03: Background Processes
+1. Start a background job: `sleep 30 &`.
+2. View active jobs with `jobs`.
+3. Kill a job using `kill <pid>`, where `<pid>` is from `jobs`.
+
+### Version 04: Command History
+1. Run several commands (`ls`, `pwd`, `whoami`).
+2. Type `history` to view the last 10 commands.
+3. Use `!number` (e.g., `!1`) to repeat a command from history.
+
+### Version 05: Built-In Commands
+1. `cd /tmp` to test changing directories.
+2. Start a background job (`sleep 30 &`), then check with `jobs`.
+3. Terminate a job with `kill <pid>` from `jobs`.
+4. Type `help` to view all built-in commands.
+
+### Version 06: Shell Variables
+1. Set a variable: `set myvar=hello`.
+2. Access it by typing `myvar` (should output `hello`).
+3. List all variables with `printenv`.
+4. Unset `myvar` with `unset myvar` and verify it no longer displays.
+
+## Example Usage
+Here’s an example session showing the use of various features across all versions:
+
+```bash
+PUCITshell@/home/user:- ls
+file1.txt  file2.txt  shell.c
+PUCITshell@/home/user:- set myvar=hello
+PUCITshell@/home/user:- myvar
+hello
+PUCITshell@/home/user:- pwd > output.txt
+PUCITshell@/home/user:- sleep 30 &
+[Background] Started process with PID 1234
+PUCITshell@/home/user:- jobs
+[1] PID: 1234
+PUCITshell@/home/user:- kill 1234
+Process 1234 terminated.
+PUCITshell@/home/user:- history
+1: ls
+2: set myvar=hello
+3: myvar
+4: pwd > output.txt
+5: sleep 30 &
+6: jobs
+PUCITshell@/home/user:- !1
+file1.txt  file2.txt  shell.c
+PUCITshell@/home/user:- help
+Built-in Commands:
+cd <directory> - Change directory
+exit - Exit the shell
+jobs - List background jobs
+kill <pid> - Terminate background process with PID
+history - Display command history
+set <name>=<value> - Set a shell variable
+unset <name> - Remove a shell variable
+printenv - List shell variables
+help - List built-in commands
+PUCITshell@/home/user:- printenv
+myvar=hello
+PUCITshell@/home/user:- unset myvar
+PUCITshell@/home/user:- myvar
+Error executing command: No such file or directory
+PUCITshell@/home/user:- exit
+```
+
+## Known Limitations
+- **Limited History**: Only stores the last 10 commands.
+- **Limited Variables**: Supports a maximum of 50 shell variables.
+- **Background Process Limit**: Only allows 10 concurrent background processes.
+  
+## Summary
+This project emulates core functionalities of a UNIX shell, building progressively with each version:
+- **Basic command execution**.
+- **I/O redirection**.
+- **Background job control**.
+- **Command history management**.
+- **Built-in commands**.
+- **Shell variable management**.
+
+Through this project, users gain a deep understanding of process control, input/output management, and command handling in a UNIX-like environment, which are crucial skills for systems programming and operating systems development.
+
+## Acknowledgments
+Thanks to the Operating Systems Lab course for providing foundational concepts and guidance, and to online resources on `fork()`, `execvp()`, `dup2()`, and signal handling for aiding the development of this shell.
 
 ---
-## Acknowledgments
-- Based on the Operating Systems Lab requirements from PUCIT.
-- Thanks to online UNIX programming resources for `fork()`, `execvp()`, `dup2()`, and signal handling with `waitpid()`.
-
-## License
-This project is licensed under the MIT License.
-
