@@ -4,14 +4,15 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <fcntl.h>
 #include <limits.h>
 
 #define BUFFER_SIZE 1024
+#define MAX_BG_PROCESSES 50
 
-pid_t bg_processes[BUFFER_SIZE];  // Array to store background process IDs
+pid_t bg_processes[MAX_BG_PROCESSES];  // Array to store background process IDs
 int bg_count = 0;  // Count of background processes
 
+// Function to display the shell prompt with the current working directory
 void display_prompt() {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -21,6 +22,30 @@ void display_prompt() {
     }
 }
 
+// Function to handle built-in commands, including 'jobs'
+int execute_builtin(char** args) {
+    if (strcmp(args[0], "jobs") == 0) {
+        printf("Background Jobs:\n");
+        for (int i = 0; i < bg_count; i++) {
+            int status;
+            pid_t result = waitpid(bg_processes[i], &status, WNOHANG);
+            if (result == 0) {
+                printf("[%d] PID: %d\n", i + 1, bg_processes[i]);  // Still running
+            } else {
+                // If the process is finished, remove it from the list
+                for (int j = i; j < bg_count - 1; j++) {
+                    bg_processes[j] = bg_processes[j + 1];
+                }
+                bg_count--;
+                i--;  // Re-check the new process in this position
+            }
+        }
+        return 1;
+    }
+    return 0;  // Not a built-in command
+}
+
+// Function to read user input from the shell prompt
 char* read_input() {
     char *buffer = NULL;
     size_t bufsize = 0;
@@ -28,6 +53,7 @@ char* read_input() {
     return buffer;
 }
 
+// Function to parse input and split by spaces
 char** parse_input(char* input) {
     int bufsize = BUFFER_SIZE, position = 0;
     char** tokens = malloc(bufsize * sizeof(char*));
@@ -58,8 +84,8 @@ char** parse_input(char* input) {
     return tokens;
 }
 
+// Function to execute commands with background process handling
 int execute_command(char** args) {
-    int in_redirect = -1, out_redirect = -1;
     int background = 0;
     int i = 0;
 
@@ -86,7 +112,9 @@ int execute_command(char** args) {
     } else {  // Parent process
         if (background) {
             printf("[Background] Started process with PID %d\n", pid);
-            bg_processes[bg_count++] = pid;  // Store background process ID
+            if (bg_count < MAX_BG_PROCESSES) {
+                bg_processes[bg_count++] = pid;  // Store background process ID
+            }
         } else {
             waitpid(pid, NULL, 0);  // Wait for foreground process to complete
         }
@@ -95,6 +123,7 @@ int execute_command(char** args) {
     return 1;
 }
 
+// Main shell loop
 int main() {
     char* input;
     char** args;
@@ -111,7 +140,9 @@ int main() {
 
         args = parse_input(input);
         if (args[0] != NULL) {
-            status = execute_command(args);
+            if (execute_builtin(args) == 0) {  // Run built-in or external command
+                status = execute_command(args);
+            }
         }
 
         free(input);
