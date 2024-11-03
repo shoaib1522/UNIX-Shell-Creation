@@ -2,7 +2,7 @@
 # UNIX-Shell-Creation
 
 ## Overview
-This project involves creating a custom UNIX shell as part of the Operating Systems Lab. The shell will gradually be developed through various versions, adding features like command parsing, I/O redirection, background process handling, and command history. This shell provides an interactive way for users to execute commands within a UNIX environment, offering both basic and advanced functionalities.
+This project involves creating a custom UNIX shell as part of the Operating Systems Lab. The shell will gradually be developed through various versions, adding features like command parsing, I/O redirection, background process handling, command history, and built-in commands. This shell provides an interactive way for users to execute commands within a UNIX environment, offering both basic and advanced functionalities.
 
 ## Versions & Features
 
@@ -31,7 +31,16 @@ This project involves creating a custom UNIX shell as part of the Operating Syst
 - Typing `history` displays the list of recent commands.
 - Allows executing a previous command by typing `!number`, where `number` is the history command index.
   - Example: `!2` executes the second command in history.
-  
+
+### Version 05 (Built-In Commands)
+- Implements several built-in commands that the shell handles internally:
+  - **`cd <directory>`**: Changes the current working directory.
+  - **`exit`**: Exits the shell.
+  - **`jobs`**: Lists currently running background processes.
+  - **`kill <pid>`**: Terminates a background process by its process ID.
+  - **`help`**: Lists all available built-in commands and their syntax.
+- These commands do not use `fork()` or `execvp()` since they are handled directly by the shell.
+
 ## How to Run
 1. Clone the repository.
 2. Compile the source code using:
@@ -52,6 +61,12 @@ This project involves creating a custom UNIX shell as part of the Operating Syst
 - **Command History**:
   - Type `history` to see a list of recent commands.
   - Type `!number` to execute a specific command from the history, where `number` is the command index.
+- **Built-In Commands**:
+  - `cd <directory>`: Change the current directory.
+  - `exit`: Exit the shell.
+  - `jobs`: Display a list of active background processes.
+  - `kill <pid>`: Terminate a background process by its PID.
+  - `help`: Display a list of available built-in commands.
 - **Exit the Shell**: Type `exit` or press `<CTRL+D>` to exit.
 
 ## Current Status
@@ -59,11 +74,12 @@ This project involves creating a custom UNIX shell as part of the Operating Syst
 - **Version 02** partially implemented with I/O redirection; pipes are planned.
 - **Version 03** is partially implemented with background processes; further enhancements planned for handling background jobs.
 - **Version 04** is implemented with basic command history and execution of past commands.
+- **Version 05** is implemented with built-in commands for `cd`, `exit`, `jobs`, `kill`, and `help`.
 
 ## Known Bugs
 - Argument parsing is limited and does not handle complex commands with pipes yet.
 - Error handling for some edge cases in redirection is minimal.
-- Background job listing and management (e.g., `jobs` command) are planned but not yet implemented.
+- Background job control for detailed job status is planned but not yet implemented.
 
 ## Acknowledgments
 - Based on the Operating Systems Lab requirements from PUCIT.
@@ -72,7 +88,6 @@ This project involves creating a custom UNIX shell as part of the Operating Syst
 ## License
 This project is licensed under the MIT License.
 
----
 
 ### Total Versions for the Assignment:
 
