@@ -12,6 +12,8 @@
 
 char* history[HISTORY_SIZE];  // Array to store command history
 int history_count = 0;  // Current count of commands in history
+pid_t bg_processes[HISTORY_SIZE];  // Array to store background process IDs
+int bg_count = 0;  // Count of background processes
 
 // Function to display the shell prompt with the current working directory
 void display_prompt() {
@@ -50,6 +52,47 @@ char* get_command_from_history(int index) {
         return NULL;
     }
     return strdup(history[index - 1]);
+}
+
+// Function to handle built-in commands
+int execute_builtin(char** args) {
+    if (strcmp(args[0], "cd") == 0) {
+        if (args[1] == NULL) {
+            fprintf(stderr, "Expected argument for \"cd\"\n");
+        } else if (chdir(args[1]) != 0) {
+            perror("cd failed");
+        }
+        return 1;
+    } else if (strcmp(args[0], "exit") == 0) {
+        exit(0);
+    } else if (strcmp(args[0], "jobs") == 0) {
+        printf("Background Jobs:\n");
+        for (int i = 0; i < bg_count; i++) {
+            printf("[%d] PID: %d\n", i + 1, bg_processes[i]);
+        }
+        return 1;
+    } else if (strcmp(args[0], "kill") == 0) {
+        if (args[1] == NULL) {
+            fprintf(stderr, "Expected PID for \"kill\"\n");
+        } else {
+            int pid = atoi(args[1]);
+            if (kill(pid, SIGKILL) == 0) {
+                printf("Process %d terminated.\n", pid);
+            } else {
+                perror("kill failed");
+            }
+        }
+        return 1;
+    } else if (strcmp(args[0], "help") == 0) {
+        printf("Built-in Commands:\n");
+        printf("cd <directory> - Change directory\n");
+        printf("exit - Exit the shell\n");
+        printf("jobs - List background jobs\n");
+        printf("kill <pid> - Terminate background process with PID\n");
+        printf("help - List built-in commands\n");
+        return 1;
+    }
+    return 0;  // Not a built-in command
 }
 
 // Function to read the user input from the shell prompt
@@ -152,11 +195,10 @@ int execute_command(char** args) {
 
     } else {  // Parent process
         if (background) {
-            // Background process: don't wait, print process ID
             printf("[Background] Started process with PID %d\n", pid);
+            bg_processes[bg_count++] = pid;  // Store background process ID
         } else {
-            // Foreground process: wait for child to finish
-            waitpid(pid, NULL, 0);
+            waitpid(pid, NULL, 0);  // Wait for foreground process
         }
     }
 
@@ -194,10 +236,7 @@ int main() {
 
         args = parse_input(input);
         if (args[0] != NULL) {
-            // Check if the command is 'history'
-            if (strcmp(args[0], "history") == 0) {
-                display_history();
-            } else {
+            if (execute_builtin(args) == 0) {  // Run built-in or external command
                 status = execute_command(args);
             }
         }
