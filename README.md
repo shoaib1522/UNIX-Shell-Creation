@@ -76,18 +76,6 @@ This project involves creating a custom UNIX shell as part of the Operating Syst
 - **Version 04** is implemented with basic command history and execution of past commands.
 - **Version 05** is implemented with built-in commands for `cd`, `exit`, `jobs`, `kill`, and `help`.
 
-## Known Bugs
-- Argument parsing is limited and does not handle complex commands with pipes yet.
-- Error handling for some edge cases in redirection is minimal.
-- Background job control for detailed job status is planned but not yet implemented.
-
-## Acknowledgments
-- Based on the Operating Systems Lab requirements from PUCIT.
-- Thanks to online UNIX programming resources for `fork()`, `execvp()`, `dup2()`, and signal handling with `waitpid()`.
-
-## License
-This project is licensed under the MIT License.
-
 
 ### Total Versions for the Assignment:
 
@@ -99,4 +87,127 @@ As per the assignment document, there are **six versions** in total:
 4. **Version 04**: Command history with `history` display and `!number` execution.
 5. **Version 05**: Built-in commands (  like `cd`, `exit`, `jobs`, `kill`, and `help`).
 6. **Version 06 (Bonus)**: Variable handling for user-defined and environment variables.
+
+Here's a step-by-step guide to test each version of your UNIX shell implementation, with specific commands for each version.
+
+---
+
+### Version 01: Basic Shell
+
+1. **Run Basic Commands**:
+   - `ls` – Lists files and directories in the current directory.
+   - `pwd` – Prints the current working directory.
+   - `whoami` – Displays the current user.
+
+2. **Exit the Shell**:
+   - Type `exit` to exit the shell.
+   - Alternatively, press `<CTRL+D>`.
+
+**Expected Outcome**: The shell executes each command, displays output, and exits when `exit` or `<CTRL+D>` is used.
+
+---
+
+### Version 02: I/O Redirection
+
+1. **Output Redirection (`>`)**:
+   - Command: `ls > output.txt`
+   - Check: Open `output.txt` to see the `ls` output.
+
+2. **Input Redirection (`<`)**:
+   - Create a file `unsorted.txt` with unsorted text.
+   - Command: `sort < unsorted.txt`
+   - Expected Outcome: Displays sorted text in the shell.
+
+3. **Combined Input and Output Redirection**:
+   - Command: `sort < unsorted.txt > sorted.txt`
+   - Check: Open `sorted.txt` to see the sorted output.
+
+**Expected Outcome**: Commands should correctly use the specified input and output files.
+
+---
+
+### Version 03: Background Processes
+
+1. **Run a Background Process**:
+   - Command: `sleep 30 &`
+   - Expected Outcome: The shell returns immediately with a message indicating the background process ID.
+
+2. **Check Background Jobs**:
+   - Command: `jobs`
+   - Expected Outcome: Displays the background process (e.g., `sleep 30`).
+
+3. **Kill a Background Process**:
+   - Command: `kill <pid>` (replace `<pid>` with the actual process ID from `jobs`).
+   - Verify with `jobs` that the process is terminated.
+
+**Expected Outcome**: Background jobs are listed with `jobs`, and processes can be terminated with `kill`.
+
+---
+
+### Version 04: Command History
+
+1. **Run Multiple Commands**:
+   - Examples: `ls`, `pwd`, `whoami`.
+
+2. **View Command History**:
+   - Command: `history`
+   - Expected Outcome: Lists the last 10 commands with numbers.
+
+3. **Execute Command from History**:
+   - Command: `!1` (replace `1` with the number of any command from `history`).
+   - Expected Outcome: Repeats the selected command from history.
+
+**Expected Outcome**: The `history` command shows recent commands, and `!number` repeats a specific command.
+
+---
+
+### Version 05: Built-In Commands
+
+1. **Change Directory**:
+   - Command: `cd /tmp`
+   - Verify with `pwd` that the directory is now `/tmp`.
+
+2. **View Background Jobs**:
+   - Start a background job: `sleep 30 &`
+   - Command: `jobs`
+   - Expected Outcome: Lists the background job.
+
+3. **Kill a Background Job**:
+   - Command: `kill <pid>` (use the PID from `jobs`).
+
+4. **Help**:
+   - Command: `help`
+   - Expected Outcome: Lists all built-in commands and descriptions.
+
+**Expected Outcome**: Built-in commands (`cd`, `jobs`, `kill`, `help`) work as specified.
+
+---
+
+### Version 06: Shell Variables
+
+1. **Set a Variable**:
+   - Command: `set myvar=hello`
+   - Expected Outcome: The variable `myvar` is set with the value `hello`.
+
+2. **Display Variable**:
+   - Command: `myvar`
+   - Expected Outcome: Prints `hello`.
+
+3. **Unset Variable**:
+   - Command: `unset myvar`
+   - Verify by typing `myvar` again; it should give an error or not display anything.
+
+4. **List All Variables**:
+   - Command: `printenv`
+   - Expected Outcome: Lists all set shell variables.
+
+**Expected Outcome**: Variables can be set, displayed, unset, and listed with `printenv`.
+
+---
+## Acknowledgments
+- Based on the Operating Systems Lab requirements from PUCIT.
+- Thanks to online UNIX programming resources for `fork()`, `execvp()`, `dup2()`, and signal handling with `waitpid()`.
+
+## License
+This project is licensed under the MIT License.
 
