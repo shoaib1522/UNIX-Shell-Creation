@@ -59,7 +59,6 @@ int execute_command(char** args) {
     int in_redirect = -1, out_redirect = -1;
     int i = 0;
 
-    // Identify any redirection operators and open the files
     while (args[i] != NULL) {
         if (strcmp(args[i], "<") == 0) {
             in_redirect = open(args[i + 1], O_RDONLY);
